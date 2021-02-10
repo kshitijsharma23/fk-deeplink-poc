@@ -8,12 +8,130 @@
 <body>
     <button id="fkButton">Go to FK app</button>
     <script type="text/javascript">
-        document.getElementById('fkButton').addEventListener('click', () => {
-            const deeplinkURL = `flipkart://fk.dl/de_wv_CL%7Casfasfd_--_https%3A%2F%2Fwww.flipkart.com`;
+        const getTuneURL = (query, deeplinkURL) => {
+            const NETWORKID = {
+                AFFILIATE: "173204",
+                EMAIL: "173206",
+                SMS: "173208",
+                SEM_BRAND: "173210",
+                BROWSER_PARTNERSHIP: "173212",
+                SEMNB_TEXT: "173214",
+                SEMNB_PLA: "173216",
+                SEMNB_DYNDISPLAY: "173218",
+                SEMNB_STATICDISPLAY: "173220",
+                SEM_NONBRAND: "173222",
+                DSIPLAY_BRAND: "173224",
+                SOCIAL_NETWORK: "173226",
+                EXTERNAL_CAMPAIGNS: "173228",
+                SEO: "173230"
+            };
+
+            let network = "";
+            let creative = "";
+            let tuneFinalUrl =
+                "https://{PUBLISHER_DOMAIN}.measurementapi.com/serve?action=click&publisher_id={PUBLISHER_ID}&site_id=108110&sub_publisher={SUB_PUBLISHER}&sub_placement={SUB_PLACEMENT}&site_id_android=106226&site_id_ios=107540&site_id_web=108040&sub_ad={CONTEXT}";
+
+            // top priority to Affiliate channel
+            if (query.affid && query.affid.indexOf("EM-") !== 0) {
+                network = NETWORKID.AFFILIATE;
+                creative = query.affid;
+
+                if (query.affExtParam1) {
+                    tuneFinalUrl += "&sub3=" + query.affExtParam1;
+                }
+            } else if (
+                query.cmpid &&
+                (query.cmpid.indexOf("email_promo") === 0 ||
+                query.cmpid.indexOf("email_EM") === 0)
+            ) {
+                network = NETWORKID.EMAIL;
+                creative = query.cmpid;
+            } else if (query.affid && query.affid.indexOf("EM-") === 0) {
+                network = NETWORKID.EMAIL;
+                creative = query.affid;
+            } else if (query.cmpid && query.cmpid.indexOf("sms_promo") === 0) {
+                network = NETWORKID.SMS;
+                creative = query.cmpid;
+            } else if (
+                query.semcmpid &&
+                (query.semcmpid === "sem_X7913415_brand_adcenter" ||
+                query.semcmpid === "sem_8024046704_brand_goog")
+            ) {
+                network = NETWORKID.SEM_BRAND;
+                creative = query.semcmpid;
+            } else if (
+                query.cmpid &&
+                (query.cmpid === "content_ucb" ||
+                query.cmpid === "content_opera" ||
+                query.cmpid === "content_tizen")
+            ) {
+                network = NETWORKID.BROWSER_PARTNERSHIP;
+                creative = query.cmpid;
+            } else if (query.semcmpid && query.semcmpid.indexOf("sem_") === 0) {
+                network = NETWORKID.SEMNB_TEXT;
+                creative = query.semcmpid;
+            } else if (
+                query.cmpid &&
+                query.cmpid.indexOf("content") === 0 &&
+                query.cmpid.indexOf("gmc_pla") > 0
+            ) {
+                network = NETWORKID.SEMNB_PLA;
+                creative = query.cmpid;
+            } else if (
+                query.cmpid &&
+                query.cmpid.indexOf("content") === 0 &&
+                query.cmpid.indexOf("dyn") > 0
+            ) {
+                network = NETWORKID.SEMNB_DYNDISPLAY;
+                creative = query.cmpid;
+            } else if (
+                query.cmpid &&
+                query.cmpid.indexOf("content") === 0 &&
+                query.cmpid.indexOf("rmkt") > 0
+            ) {
+                network = NETWORKID.SEMNB_STATICDISPLAY;
+                creative = query.cmpid;
+            } else if (
+                query.cmpid &&
+                (query.cmpid.indexOf("content") === 0 ||
+                query.cmpid.indexOf("display") === 0)
+            ) {
+                network = NETWORKID.SEM_NONBRAND;
+                creative = query.cmpid;
+            } else if (query.semcmpid) {
+                network = NETWORKID.SEM_NONBRAND;
+                creative = query.semcmpid;
+            } else if (query.disp) {
+                network = NETWORKID.DISPLAY_BRAND;
+                creative = query.disp;
+            } else if (query.ocmpid && query.ocmpid.indexOf("socialorg") >= 0) {
+                network = NETWORKID.SOCIAL_NETWORK;
+                creative = query.ocmpid;
+            } else if (query.ocmpid) {
+                network = NETWORKID.EXTERNAL_CAMPAIGNS;
+                creative = query.ocmpid;
+            } else {
+                network = NETWORKID.SEO;
+                creative = "Direct_SEO";
+            }
+
+            // Passing context in google referrer
+            let context = "";
+            if (deeplinkURL) {
+                context = encodeURIComponent(deeplinkURL.replace("flipkart://", ""));
+            }
+
+            tuneFinalUrl = tuneFinalUrl.replace("{PUBLISHER_DOMAIN}", network);
+            tuneFinalUrl = tuneFinalUrl.replace("{PUBLISHER_ID}", network);
+            tuneFinalUrl = tuneFinalUrl.replace("{SUB_PUBLISHER}", creative);
+            tuneFinalUrl = tuneFinalUrl.replace("{SUB_PLACEMENT}", "direct_fallback");
+            tuneFinalUrl = tuneFinalUrl.replace("{CONTEXT}", context);
+
+            return tuneFinalUrl;
+        }
+
+        const attemptRedirectToApp = (deeplinkURL) => {
             if (navigator.userAgent.match(/(iPad|iPhone|iPod)/)) {
-                setTimeout(() => {
-                    window.location.href = 'https://apps.apple.com/in/app/flipkart-online-shopping-app/id742044692';
-                }, 25);
                 window.location.href = deeplinkURL;
             } else if (navigator.userAgent.match(/OPR/)) {
                 // this.launchUrlInsideIframe(deeplinkURL);
@@ -25,6 +143,20 @@
                     'intent://'
                 )}/#Intent;scheme=flipkart;package=com.flipkart.android;end`;
             }
+        }
+
+        document.getElementById('fkButton').addEventListener('click', () => {
+            const deeplinkURL = `flipkart://fk.dl/de_wv_CL%7Casfasfd_--_https%3A%2F%2Fwww.flipkart.com`;
+            const applicationStoreURL = getTuneURL({}, deeplinkURL);
+            const launchTime = new Date().getTime();
+            setTimeout(() => {
+                const isTimerExpired = new Date().getTime() - launchTime > 2500;
+                if (!isTimerExpired) {
+                    window.location.href = applicationStoreURL;
+                }
+            }, 2000);
+
+            attemptRedirectToApp(deeplinkURL);
         });
     </script>
 </body>
