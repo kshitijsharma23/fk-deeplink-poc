@@ -11,6 +11,9 @@
         document.getElementById('fkButton').addEventListener('click', () => {
             const deeplinkURL = `flipkart://fk.dl/de_wv_CL%7Casfasfd_--_https%3A%2F%2Fwww.flipkart.com`;
             if (navigator.userAgent.match(/(iPad|iPhone|iPod)/)) {
+                setTimeout(() => {
+                    window.location.href = 'https://apps.apple.com/in/app/flipkart-online-shopping-app/id742044692';
+                }, 25);
                 window.location.href = deeplinkURL;
             } else if (navigator.userAgent.match(/OPR/)) {
                 // this.launchUrlInsideIframe(deeplinkURL);
