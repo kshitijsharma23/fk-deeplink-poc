@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FK Deeplink POC</title>
+</head>
+<body>
+    <button id="fkButton">Go to FK app</button>
+    <script type="text/javascript">
+        document.getElementById('fkButton').addEventListener('click', () => {
+            const deeplinkURL = `flipkart://fk.dl/de_wv_CL%7Casfasfd_--_https%3A%2F%2Fwww.flipkart.com`;
+            if (navigator.userAgent.match(/(iPad|iPhone|iPod)/)) {
+                window.location.href = deeplinkURL;
+            } else if (navigator.userAgent.match(/OPR/)) {
+                // this.launchUrlInsideIframe(deeplinkURL);
+            } else if (navigator.userAgent.match(/Opera Mini/)) {
+                window.location.href = deeplinkURL;
+            } else if (navigator.userAgent.match(/Chrome/)) {
+                window.location.href = `${deeplinkURL.replace(
+                    'flipkart://',
+                    'intent://'
+                )}/#Intent;scheme=flipkart;package=com.flipkart.android;end`;
+            }
+        });
+    </script>
+</body>
+</html>
