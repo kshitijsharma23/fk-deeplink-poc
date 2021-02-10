@@ -7,6 +7,7 @@
 </head>
 <body>
     <button id="fkButton">Go to FK app</button>
+    <button id="fkDynamicButton">Use dynamic link</button>
     <script type="text/javascript">
         const getTuneURL = (query, deeplinkURL) => {
             const NETWORKID = {
@@ -158,6 +159,10 @@
 
             attemptRedirectToApp(deeplinkURL);
         });
+
+        document.getElementById('fkDynamicButton').addEventListener('click', () => {
+            window.location.href = 'https://jf82k.app.goo.gl/?link=https://www.flipkart.com/search?q=tshirt&apn=com.flipkart.android&ibi=com.appflipkart.flipkart';
+        })
     </script>
 </body>
 </html>
